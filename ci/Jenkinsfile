@@ -1,0 +1,46 @@
+pipeline {
+  agent any
+  environment {
+    AWS_REGION   = "eu-central-1"
+    ECR_REPO     = "demo-app"
+    IMAGE_TAG    = "${BUILD_NUMBER}"
+  }
+
+  stages {
+    stage("Checkout") {
+      steps { checkout scm }
+    }
+    stage("Terraform apply (ECR)") {
+      steps {
+        dir("infra") {
+          sh "terraform init -input=false"
+          sh "terraform apply -auto-approve -input=false"
+          sh "terraform output"
+        }
+      }
+    }
+
+    stage("Build image") {
+      steps {
+        sh "docker build -t ${ECR_REPO}:${IMAGE_TAG} app"
+      }
+    }
+    
+    stage("Login & Push to ECR") {
+      steps {
+        withCredentials([usernamePassword(credentialsId: 'aws-creds', usernameVariable: 'AWS_ACCESS_KEY_ID', passwordVariable: 'AWS_SECRET_ACCESS_KEY')]) {
+          sh '''
+            set -euo pipefail
+            export AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY
+            AWS_ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
+            ECR_URL="${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com"
+            aws ecr get-login-password --region "${AWS_REGION}" | docker login --username AWS --password-stdin "${ECR_URL}"
+            docker tag "${ECR_REPO}:${IMAGE_TAG}" "${ECR_URL}/${ECR_REPO}:${IMAGE_TAG}"
+            docker push "${ECR_URL}/${ECR_REPO}:${IMAGE_TAG}"
+            echo "PUSHED: ${ECR_URL}/${ECR_REPO}:${IMAGE_TAG}"
+          '''
+        }
+      }
+    }
+  }
+}

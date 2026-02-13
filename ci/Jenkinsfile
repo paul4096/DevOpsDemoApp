@@ -2,7 +2,7 @@ pipeline {
   agent any
   environment {
     AWS_REGION   = "eu-central-1"
-    ECR_REPO     = "demo-app"
+    ECR_REPO     = "demo-app-pkl"
     IMAGE_TAG    = "${BUILD_NUMBER}"
   }
 

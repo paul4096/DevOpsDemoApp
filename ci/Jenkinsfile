@@ -20,6 +20,7 @@ pipeline {
           sh "terraform output"
         }
       }
+      }
     }
 
     stage("Build image") {

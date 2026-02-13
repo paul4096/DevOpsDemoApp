@@ -9,3 +9,9 @@ variable "ecr_repo_name" {
     type = string
     default = "demo-app-pkl"  
 }
+
+variable "app_image" {
+    type = string
+    default = "504913911906.dkr.ecr.eu-central-1.amazonaws.com/demo-app-pkl:10"
+  
+}

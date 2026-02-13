@@ -15,7 +15,7 @@ pipeline {
     stage("Terraform apply (ECR)") {
       steps {
         withCredentials([usernamePassword(
-          credentialsId: 'aws-creds',
+          credentialsId: 'AWS CREDS',
           usernameVariable: 'AWS_ACCESS_KEY_ID',
           passwordVariable: 'AWS_SECRET_ACCESS_KEY'
         )]) {
@@ -46,7 +46,7 @@ pipeline {
     stage("Login & Push to ECR") {
       steps {
         withCredentials([usernamePassword(
-          credentialsId: 'aws-creds',
+          credentialsId: 'AWS CREDS',
           usernameVariable: 'AWS_ACCESS_KEY_ID',
           passwordVariable: 'AWS_SECRET_ACCESS_KEY'
         )]) {
